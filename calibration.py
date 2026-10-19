@@ -37,12 +37,24 @@ class Calibration:
         with open(path) as f:
             return cls(**json.load(f))
 
-    def apply(self, df):
-        """Return a copy of df with mu1_pt and mu2_pt corrected (divided by their scale).
+def apply(self, df):
+    """Return a copy of df with mu1_pt and mu2_pt corrected (divided by their scale).
 
-        The interface agreed by the two teams. For now a dummy: it returns the data unchanged.
-        """
-        return df.copy()            # TODO (B): divide each pT by the scale of its eta region
+    The interface agreed by the two teams. For now a dummy: it returns the data unchanged.
+    """
+    res = df.copy() #creamos una copia exacta del DataFrame
+    
+    #primero creamos una condición para saber que escala le toca a cada muon  (máscara)
+    
+    low1 = res['mu1_eta'] < ETA_SPLIT  #comprobamos la primera columna para ver fila por fila si es menor que el límite establecido
+    low2 = res['mu2_eta'] < ETA_SPLIT  #lo mismo pero para el segundo muon
+    
+    res['mu1_pt'] = res['mu1_pt']/np.where(low1, self.low, self.high) #dividimos el momento trasversal, dividiéndolo por su factor de escala
+    #si está por debajo, se cumple la condicion low1 y aplicamos la escala self.low
+    #si está por encima o es igual, la condición no se cumple y utilizamos self.high como escala
+    
+    res['mu2_pt'] = res['mu2_pt']/np.where(low2, self.low, self.high) #lo mismo para el momento transversal del segundo muon
+    return res
 
     def fit(self, control):
         """Fit the J/psi peak in events with both muons in the same region; set the scales.
