@@ -49,4 +49,24 @@ class Calibration:
 
         control: selected events of the control sample. Returns self.
         """
-        raise NotImplementedError   # TODO (B)
+
+        #REGIÓN LOW (eta < 3.5):
+        low_events = control[(control.mu1_eta < ETA_SPLIT) & (control.mu2_eta < ETA_SPLIT)]
+
+        #REGIÓN HIGH (eta > 3.5):
+        high_events = control[(control.mu1_eta > ETA_SPLIT) & (control.mu2_eta > ETA_SPLIT)]
+
+        #Calculo masas invariantes:
+        mass_low = dimuon.invariant_mass(low_events)
+        mass_high = dimuon.invariant_mass(high_events)   
+
+        #Ajustamos el pico de J/psi en cada región:
+        mean_low, error_low, sigma_low = fit_peak(mass_low)
+        mean_high, error_high, sigma_high = fit_peak(mass_high)
+
+        #Calculamos los factores de calibración:
+        self.low = mean_low / M_JPSI
+        self.high = mean_high / M_JPSI
+
+        return self
+
