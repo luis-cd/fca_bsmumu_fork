@@ -4,7 +4,7 @@ from functools import reduce
 
 import numpy as np
 
-M_MU = 0.1056584        # GeV
+m_mu = 0.1056584        # GeV
 
 
 def invariant_mass(df):
