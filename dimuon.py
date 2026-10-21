@@ -36,7 +36,7 @@ def invariant_mass(df):
 
 
 # A cut is a function: DataFrame -> boolean Series (True = keep the row)
-
+# the cuts (opposite charges, muon identification, vertex)
 def has_trigger(df):
     return df['trigger']
 
