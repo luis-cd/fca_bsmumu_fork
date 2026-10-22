@@ -41,7 +41,7 @@ def has_trigger(df):
     return df['trigger']
 
 def opposite_charges(df):
-    return df[mu1_q] * df[mu2_q] < 0
+    return df["mu1_q"] * df["mu2_q"] < 0
 
 def mu_pid():
     raise NotImplementedError
@@ -63,7 +63,7 @@ def select(df, cuts=CUTS):
 
     mask = reduce(
         lambda a, b: a & b,
-        (cut(df) for cut in cut)
+        (cut(df) for cut in cuts)
     )
     
     return df.loc[mask]       # TODO (C)
