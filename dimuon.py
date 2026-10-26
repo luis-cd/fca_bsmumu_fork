@@ -43,11 +43,18 @@ def has_trigger(df):
 def opposite_charges(df):
     return df["mu1_q"] * df["mu2_q"] < 0
 
-def mu_pid():
-    raise NotImplementedError
+#Parametro de la señal que se ve en la distribution
+c_pid = 0.8
+c_vtx = 5.0
 
-def vtx_chi():
-    raise NotImplementedError
+def mu_pid(df):
+    return(
+        (df["mu1_pid"] > c_pid) 
+        & (df["mu2_pid"] > c_pid)
+    )
+
+def vtx_chi(df):
+    return df["vtx_chi2"] < c_vtx
 
 
 # TODO (C): more cuts: opposite charges (mu1_q, mu2_q), and on mu1_pid, mu2_pid and vtx_chi2
@@ -66,4 +73,4 @@ def select(df, cuts=CUTS):
         (cut(df) for cut in cuts)
     )
     
-    return df.loc[mask]       # TODO (C)
+    return df.loc[mask]       #TODO(C)
