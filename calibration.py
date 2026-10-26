@@ -37,6 +37,7 @@ def fit_peak(m, lo=2.85, hi=3.25, bins=80):
     error=np.sqrt(covariance[1,1])
     width=params[2]
     return mean,error,width
+
 class Calibration:
     """Momentum scale of the muons in two eta regions: measured pT = scale * true pT."""
 
