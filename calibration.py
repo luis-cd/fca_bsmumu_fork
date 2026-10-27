@@ -61,11 +61,43 @@ class Calibration:
 
         The interface agreed by the two teams. For now a dummy: it returns the data unchanged.
         """
-        return df.copy()            # TODO (B): divide each pT by the scale of its eta region
+        res = df.copy() #creamos una copia exacta del DataFrame
+    
+        #primero creamos una condición para saber que escala le toca a cada muon  (máscara)
+    
+        low1 = res['mu1_eta'] < ETA_SPLIT  #comprobamos la primera columna para ver fila por fila si es menor que el límite establecido
+        low2 = res['mu2_eta'] < ETA_SPLIT  #lo mismo pero para el segundo muon
+    
+        res['mu1_pt'] = res['mu1_pt']/np.where(low1, self.low, self.high) #dividimos el momento trasversal, dividiéndolo por su factor de escala
+        #si está por debajo, se cumple la condicion low1 y aplicamos la escala self.low
+        #si está por encima o es igual, la condición no se cumple y utilizamos self.high como escala
+    
+        res['mu2_pt'] = res['mu2_pt']/np.where(low2, self.low, self.high) #lo mismo para el momento transversal del segundo muon
+        return res
 
     def fit(self, control):
         """Fit the J/psi peak in events with both muons in the same region; set the scales.
 
         control: selected events of the control sample. Returns self.
         """
-        raise NotImplementedError   # TODO (B)
+
+        #REGIÓN LOW (eta < 3.5):
+        low_events = control[(control.mu1_eta < ETA_SPLIT) & (control.mu2_eta < ETA_SPLIT)]
+
+        #REGIÓN HIGH (eta > 3.5):
+        high_events = control[(control.mu1_eta > ETA_SPLIT) & (control.mu2_eta > ETA_SPLIT)]
+
+        #Calculo masas invariantes:
+        mass_low = dimuon.invariant_mass(low_events)
+        mass_high = dimuon.invariant_mass(high_events)   
+
+        #Ajustamos el pico de J/psi en cada región:
+        mean_low, error_low, sigma_low = fit_peak(mass_low)
+        mean_high, error_high, sigma_high = fit_peak(mass_high)
+
+        #Calculamos los factores de calibración:
+        self.low = mean_low / M_JPSI
+        self.high = mean_high / M_JPSI
+
+        return self
+
