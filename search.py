@@ -23,16 +23,107 @@ def model(x, n_bkg, slope, n_b0, n_bs, sigma):
     peak = lambda mass: width * stats.norm.pdf(x, mass, sigma)
     return n_bkg * np.exp(-slope * (x - 5)) + n_b0 * peak(M_B0) + n_bs * peak(M_BS)
 
-
-def fit(m, sigma, with_bs=True):
-    """Fit the model to the histogram of m with curve_fit, the width sigma fixed.
-
-    with_bs=False fixes n_bs = 0 (the background-only hypothesis, H0).
-    Returns the parameters, their errors and the chi2 of the fit.
+def fit(
+        m: np.ndarray,
+        sigma: float,
+        with_bs: bool = True,
+    ) -> tuple[np.ndarray, np.ndarray, float]:
     """
-    raise NotImplementedError       # TODO (D)
+    Fit the invariant mass distribution to the signal and background histogram model.
+    
+    If with_bs is True, the model includes the background, the B0 peak and
+    the Bs peak. Otherwise, the Bs contribution is fixed to zero.
+
+    Inputs
+    ----------
+    m : np.ndarray (the masses in GeV)
+    sigma : float (Constant mass sigma)
+    with_bs : bool, default=True
+        Whether to include the Bs signal in the fit.
+        If False, n_bs is fixed to zero.
+
+    Returns
+    -------
+    params : np.ndarray
+        Best-fit parameters. If with_bs is True, the order is
+        [n_bkg, slope, n_b0, n_bs]. Otherwise, the order is
+        [n_bkg, slope, n_b0].
+    param_errors : np.ndarray
+        One-standard-deviation uncertainties of the fitted parameters,
+        estimated from the covariance matrix.
+    chi2 : float
+        Chi-square statistic of the fit.
+
+    May raise RuntimeError if the nonlinear fit fails to converge.
+    """
+    x, counts = histogram(m)
+    errors = np.sqrt(np.maximum(counts, 1))
+
+    if with_bs:
+        p0 = [max(float(np.mean(counts)), 1.0), 1.0, 10.0, 10.0]
+        bounds = (
+            [0.0, -np.inf, 0.0, 0.0],
+            [np.inf, np.inf, np.inf, np.inf],
+        )
+        fit_function = lambda x, n_bkg, slope, n_b0, n_bs: model(
+            x, n_bkg, slope, n_b0, n_bs, sigma
+        )
+    else:
+        p0 = [max(float(np.mean(counts)), 1.0), 1.0, 10.0]
+        bounds = (
+            [0.0, -np.inf, 0.0],
+            [np.inf, np.inf, np.inf],
+        )
+        fit_function = lambda x, n_bkg, slope, n_b0: model(
+            x, n_bkg, slope, n_b0, 0.0, sigma
+        )
+
+    params, covariance = optimize.curve_fit(
+        fit_function,
+        x,
+        counts,
+        p0=p0,
+        sigma=errors,
+        absolute_sigma=True,
+        bounds=bounds,
+        maxfev=10000,
+    )
+
+    param_errors = np.sqrt(np.maximum(np.diag(covariance), 0.0))
+
+    expected = fit_function(x, *params)
+    chi2 = float(np.sum(((counts - expected) / errors) ** 2))
+
+    return params, param_errors, chi2
 
 
-def pvalue(m, sigma):
-    """p-value of the background-only hypothesis (no Bs), and its significance in sigmas."""
-    raise NotImplementedError       # TODO (D)
+def pvalue(
+        m: np.ndarray,
+        sigma: float,
+    ) -> tuple[float, float]:
+    """
+    Calculate the p-value and significance of the Bs signal.
+
+    Parameters
+    ----------
+    m : np.ndarray
+        One-dimensional array of invariant masses, in GeV.
+    sigma : float
+        Fixed mass resolution of the signal peaks, in GeV. Must be positive.
+
+    Returns
+    -------
+    p : float (p-value)
+    significance : float
+        Significance expressed in standard deviations (sigma), calculated
+        from the two-sided standard normal tail probability p.
+
+    """
+    _, _, chi2_0 = fit(m, sigma, with_bs=False)
+    _, _, chi2_1 = fit(m, sigma, with_bs=True)
+
+    delta_chi2 = max(chi2_0 - chi2_1, 0.0)
+    p = float(stats.chi2.sf(delta_chi2, df=1) / 2)
+    significance = float(stats.norm.isf(p))
+
+    return p, significance
