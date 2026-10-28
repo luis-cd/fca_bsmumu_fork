@@ -163,4 +163,15 @@ At the end of the session, your repository with:
 
 ## Results
 
-*(to complete)*
+Group 1.
+
+| | |
+|:--|:--|
+| Scale `low` ($\eta < 3.5$) | 0.9909 |
+| Scale `high` ($\eta \geq 3.5$) | 0.9753 |
+| $n_{B^0}$ | 0.0 ± 7.7 |
+| $n_{B_s}$ | 21.9 ± 9.0 |
+| p-value | 0.015 |
+| Significance | 2.4σ |
+
+![Fit of the mass spectrum](search_fit.png)
