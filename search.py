@@ -123,7 +123,7 @@ def pvalue(
     _, _, chi2_1 = fit(m, sigma, with_bs=True)
 
     delta_chi2 = max(chi2_0 - chi2_1, 0.0)
-    p = float(stats.chi2.sf(delta_chi2, df=1) / 2)
-    significance = float(stats.norm.isf(p))
+    p = float(stats.chi2.sf(delta_chi2, df=1))
+    significance = float(np.sqrt(delta_chi2))
 
     return p, significance
