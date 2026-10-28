@@ -165,13 +165,15 @@ At the end of the session, your repository with:
 
 Group 1.
 
-| | |
-|:--|:--|
-| Scale `low` ($\eta < 3.5$) | 0.9909 ± 0.0002 |
-| Scale `high` ($\eta \geq 3.5$) | 0.9753 ± 0.0002 |
-| $n_{B^0}$ | 0.0 ± 7.7 |
-| $n_{B_s}$ | 21.9 ± 9.0 |
-| p-value | 0.015 |
-| Significance | 2.4σ |
+| | | Source |
+|:--|:--|:--|
+| Scale `low` ($\eta < 3.5$) | 0.9909 | `calibration.ipynb`, 6. The scales of the data |
+| Scale `high` ($\eta \geq 3.5$) | 0.9753 | `calibration.ipynb`, 6. The scales of the data |
+| $n_{B^0}$ | 0.0 ± 7.7 | `analysis.ipynb`, 3. Fit and p-value (on the sample) |
+| $n_{B_s}$ | 21.9 ± 9.0 | `analysis.ipynb`, 3. Fit and p-value (on the sample) |
+| p-value | 0.015 | `analysis.ipynb`, 3. Fit and p-value (on the sample) |
+| Significance | 2.4σ | `analysis.ipynb`, 3. Fit and p-value (on the sample) |
 
 ![Fit of the mass spectrum](search_fit.png)
+
+*`search_fit.png`: `analysis.ipynb`, 5. The figure for the README.*
